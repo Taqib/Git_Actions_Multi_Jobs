@@ -12,99 +12,71 @@ jobs:
       BUILD_VERSION: 1.0.0
     runs-on: ubuntu-latest
     steps:
-      - name: Echo build version
-        run: echo "Building version $BUILD_VERSION" | tee -a build.log
-
+      - run: echo "Building version $BUILD_VERSION"
       - name: Checkout code
         uses: actions/checkout@v4
-
+      
       - name: Build step
         run: |
-          echo "$(date): 🏗️ Starting build process..." | tee -a build.log
-          echo "🏗️ Building the application..." | tee -a build.log
-          echo "$(date): Build completed successfully!" | tee -a build.log
-
+          echo "🏗️ Building the application..."
+          echo "Build completed successfully!"
       - name: Build status
-        if: ${{ success() }}
-        run: echo "$(date): ✅ Build succeeded!" | tee -a build.log
+        if: success()
+        run: echo "✅ Build succeeded!"
 
+      # Error handling for build failure
       - name: Build failure handling
-        if: ${{ failure() }}
-        run: echo "$(date): ❌ Build failed! Check build.log for details." | tee -a build.log
-
-      - name: Upload build logs
-        if: ${{ always() }}
-        uses: actions/upload-artifact@v3
-        with:
-          name: build-log
-          path: build.log
+        if: failure()
+        run: echo "❌ Build failed! Please check the logs for more information."
   
   # Second job: Test
   test:
     name: Run Tests
-    needs: build
+    needs: build  # Depends on build job
     runs-on: ubuntu-latest
     steps:
       - name: Run tests
         run: |
-          echo "$(date): 🧪 Running tests..." | tee -a test.log
-          echo "All tests passed!" | tee -a test.log
+          echo "🧪 Running tests..."
+          echo "All tests passed!"
 
+      # Error handling for test failure
       - name: Test failure handling
-        if: ${{ failure() }}
-        run: echo "$(date): ❌ Tests failed! Check test.log for details." | tee -a test.log
-
-      - name: Upload test logs
-        if: ${{ always() }}
-        uses: actions/upload-artifact@v3
-        with:
-          name: test-log
-          path: test.log
+        if: failure()
+        run: echo "❌ Tests failed! Please review test logs."
 
   # Third job: Deploy
   deploy:
     name: Deploy Application
-    if: ${{ github.ref == 'refs/heads/main' }}
-    needs: [build, test]
+    if: github.ref == 'refs/heads/main'
+    needs: [build, test]  # Depends on both build and test jobs
     runs-on: ubuntu-latest
     steps:
       - name: Deploy
         run: |
-          echo "$(date): 🚀 Starting deployment..." | tee -a deploy.log
-          echo "🚀 Deploying application..." | tee -a deploy.log
-          echo "$(date): Deployment successful!" | tee -a deploy.log
+          echo "🚀 Deploying application..."
+          echo "Deployment successful!"
 
+      # Error handling for deployment failure
       - name: Deployment failure handling
-        if: ${{ failure() }}
-        run: echo "$(date): ❌ Deployment failed! Check deploy.log for details." | tee -a deploy.log
-
-      - name: Upload deployment logs
-        if: ${{ always() }}
-        uses: actions/upload-artifact@v3
-        with:
-          name: deploy-log
-          path: deploy.log
+        if: failure()
+        run: echo "❌ Deployment failed! Investigate the deployment logs."
 
   # Fourth job: Notify
   notify:
     name: Send Notification
-    needs: deploy
+    needs: deploy  # Depends on deploy job
     runs-on: ubuntu-latest
     steps:
+      # Notify only on success
       - name: Send success notification
-        if: ${{ success() }}
+        if: success()
         run: |
-          echo "$(date): 📧 Sending deployment success notification..." | tee -a notify.log
-          echo "Notification sent!" | tee -a notify.log
+          echo "📧 Sending deployment notification..."
+          echo "Notification sent!"
 
+      # Error handling for deployment failure
       - name: Notify on deployment failure
-        if: ${{ failure() }}
+        if: failure()
         run: |
-          echo "$(date): 📧 Deployment failed! Sending failure notification..." | tee -a notify.log
-
-      - name: Upload notification logs
-        if: ${{ always() }}
-        uses: actions/upload-artifact@v3
-        with:
-          name: notify-log
-          path: notify.log
+          echo "📧 Notification: Deployment failed! Alerting team..."
