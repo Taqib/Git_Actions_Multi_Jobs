@@ -25,17 +25,15 @@ jobs:
           echo "$(date): Build completed successfully!" | tee -a build.log
 
       - name: Build status
-        if: success()
+        if: ${{ success() }}
         run: echo "$(date): ✅ Build succeeded!" | tee -a build.log
 
-      # Error handling for build failure
       - name: Build failure handling
-        if: failure()
+        if: ${{ failure() }}
         run: echo "$(date): ❌ Build failed! Check build.log for details." | tee -a build.log
 
-      # Save build log as artifact
       - name: Upload build logs
-        if: always()
+        if: ${{ always() }}
         uses: actions/upload-artifact@v3
         with:
           name: build-log
@@ -52,14 +50,12 @@ jobs:
           echo "$(date): 🧪 Running tests..." | tee -a test.log
           echo "All tests passed!" | tee -a test.log
 
-      # Error handling for test failure
       - name: Test failure handling
-        if: failure()
+        if: ${{ failure() }}
         run: echo "$(date): ❌ Tests failed! Check test.log for details." | tee -a test.log
 
-      # Save test log as artifact
       - name: Upload test logs
-        if: always()
+        if: ${{ always() }}
         uses: actions/upload-artifact@v3
         with:
           name: test-log
@@ -68,7 +64,7 @@ jobs:
   # Third job: Deploy
   deploy:
     name: Deploy Application
-    if: github.ref == 'refs/heads/main'
+    if: ${{ github.ref == 'refs/heads/main' }}
     needs: [build, test]
     runs-on: ubuntu-latest
     steps:
@@ -78,14 +74,12 @@ jobs:
           echo "🚀 Deploying application..." | tee -a deploy.log
           echo "$(date): Deployment successful!" | tee -a deploy.log
 
-      # Error handling for deployment failure
       - name: Deployment failure handling
-        if: failure()
+        if: ${{ failure() }}
         run: echo "$(date): ❌ Deployment failed! Check deploy.log for details." | tee -a deploy.log
 
-      # Save deployment log as artifact
       - name: Upload deployment logs
-        if: always()
+        if: ${{ always() }}
         uses: actions/upload-artifact@v3
         with:
           name: deploy-log
@@ -97,22 +91,19 @@ jobs:
     needs: deploy
     runs-on: ubuntu-latest
     steps:
-      # Notify only on success
       - name: Send success notification
-        if: success()
+        if: ${{ success() }}
         run: |
           echo "$(date): 📧 Sending deployment success notification..." | tee -a notify.log
           echo "Notification sent!" | tee -a notify.log
 
-      # Notify on deployment failure
       - name: Notify on deployment failure
-        if: failure()
+        if: ${{ failure() }}
         run: |
           echo "$(date): 📧 Deployment failed! Sending failure notification..." | tee -a notify.log
 
-      # Save notification log as artifact
       - name: Upload notification logs
-        if: always()
+        if: ${{ always() }}
         uses: actions/upload-artifact@v3
         with:
           name: notify-log
