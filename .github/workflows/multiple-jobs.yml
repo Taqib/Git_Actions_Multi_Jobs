@@ -20,10 +20,14 @@ jobs:
         run: |
           echo "🏗️ Building the application..."
           echo "Build completed successfully!"
-
       - name: Build status
         if: success()
-        run: echo "✅ Build succeeded!"    
+        run: echo "✅ Build succeeded!"
+
+      # Error handling for build failure
+      - name: Build failure handling
+        if: failure()
+        run: echo "❌ Build failed! Please check the logs for more information."
   
   # Second job: Test
   test:
@@ -35,7 +39,12 @@ jobs:
         run: |
           echo "🧪 Running tests..."
           echo "All tests passed!"
-  
+
+      # Error handling for test failure
+      - name: Test failure handling
+        if: failure()
+        run: echo "❌ Tests failed! Please review test logs."
+
   # Third job: Deploy
   deploy:
     name: Deploy Application
@@ -48,13 +57,26 @@ jobs:
           echo "🚀 Deploying application..."
           echo "Deployment successful!"
 
+      # Error handling for deployment failure
+      - name: Deployment failure handling
+        if: failure()
+        run: echo "❌ Deployment failed! Investigate the deployment logs."
+
   # Fourth job: Notify
   notify:
     name: Send Notification
     needs: deploy  # Depends on deploy job
     runs-on: ubuntu-latest
     steps:
-      - name: Send notification
+      # Notify only on success
+      - name: Send success notification
+        if: success()
         run: |
           echo "📧 Sending deployment notification..."
           echo "Notification sent!"
+
+      # Error handling for deployment failure
+      - name: Notify on deployment failure
+        if: failure()
+        run: |
+          echo "📧 Notification: Deployment failed! Alerting team..."
