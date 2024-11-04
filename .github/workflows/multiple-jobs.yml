@@ -12,7 +12,8 @@ jobs:
       BUILD_VERSION: 1.0.0
     runs-on: ubuntu-latest
     steps:
-      - run: echo "Building version $BUILD_VERSION" | tee -a build.log
+      - name: Echo build version
+        run: echo "Building version $BUILD_VERSION" | tee -a build.log
 
       - name: Checkout code
         uses: actions/checkout@v4
